@@ -44,46 +44,31 @@ GeneralConfigWidget::GeneralConfigWidget(QWidget * parent) : BaseConfigWidget(pa
 
 	Ui_GeneralConfigWidget::setupUi(this);
 
-	confs_dir_sel = new FileSelectorWidget(this);
-	confs_dir_sel->setToolTip(tr("pgModeler configurations directory for the current user"));
-	confs_dir_sel->setReadOnly(true);
-	confs_dir_sel->setFileMode(QFileDialog::Directory);
-	confs_dir_sel->setSelectedFile(GlobalAttributes::getConfigurationsDir());
-	general_grid->addWidget(confs_dir_sel, 1, 2, 1, 2);
-
-	source_editor_sel = new FileSelectorWidget(this);
-	source_editor_sel->setToolTip(tr("pgModeler configurations directory for the current user"));
-	source_editor_sel->setAllowFilenameInput(true);
-	source_editor_sel->setFileMode(QFileDialog::ExistingFile);
-	source_editor_sel->setAcceptMode(QFileDialog::AcceptOpen);
-	source_editor_sel->setWindowTitle(tr("Select application"));
-	source_editor_sel->setToolTip(tr("External source code editor application"));
-	general_grid->addWidget(source_editor_sel, 2, 2, 1, 2);
-
-	line_numbers_cp=new ColorPickerWidget(1, this);
-	line_numbers_cp->setButtonToolTip(0, tr("Line numbers' font color"));
-
-	line_numbers_bg_cp=new ColorPickerWidget(1, this);
-	line_numbers_bg_cp->setButtonToolTip(0, tr("Line numbers' background color"));
-
-	line_highlight_cp=new ColorPickerWidget(1, this);
-	line_highlight_cp->setButtonToolTip(0, tr("Highlighted line color"));
-
-	font_preview_txt=new NumberedTextEditor(this);
-	font_preview_txt->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-	font_preview_txt->setPlainText(tr("The little brown fox jumps over the lazy dog") + QString("\n\ttext with tab «") + QString("\n0123456789\n.()[]{};"));
-
-	QBoxLayout *layout=new QBoxLayout(QBoxLayout::LeftToRight);
-	QGridLayout *grid=dynamic_cast<QGridLayout *>(code_font_gb->layout());
-	layout->addWidget(line_numbers_cp);
-	layout->addWidget(line_numbers_bg_cp);
-	layout->addWidget(line_highlight_cp);
-	layout->addItem(new QSpacerItem(1000,20, QSizePolicy::Expanding));
-	grid->addLayout(layout, 2, 1);
-	grid->addWidget(font_preview_txt,grid->count(),0,1,5);
-
-	for(int i=0; i < count; i++)
-		paper_cmb->setItemData(i, QVariant(paper_ids[i]));
+        line_numbers_cp=new ColorPickerWidget(1, this);
+        line_numbers_cp->setButtonToolTip(0, tr("Line numbers' font color"));
+        
+        line_numbers_bg_cp=new ColorPickerWidget(1, this);
+        line_numbers_bg_cp->setButtonToolTip(0, tr("Line numbers' background color"));
+        
+        line_highlight_cp=new ColorPickerWidget(1, this);
+        line_highlight_cp->setButtonToolTip(0, tr("Highlighted line color"));
+        
+        font_preview_txt=new NumberedTextEditor(this);
+        font_preview_txt->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+        font_preview_txt->setPlainText(tr("The little brown fox jumps over the lazy dog") + QString("\n\ttext with tab «") + QString("\n0123456789\n.()[]{};"));
+        
+        QBoxLayout *layout=new QBoxLayout(QBoxLayout::LeftToRight);
+        QGridLayout *grid=dynamic_cast<QGridLayout *>(code_font_gb->layout());
+        layout->addWidget(line_numbers_cp);
+        layout->addWidget(line_numbers_bg_cp);
+        layout->addWidget(line_highlight_cp);
+        layout->addItem(new QSpacerItem(1000,20, QSizePolicy::Expanding));
+        grid->addLayout(layout, 2, 1);
+        grid->addWidget(font_preview_txt,grid->count(),0,1,5);
+        
+        for(int i=0; i < count; i++)
+                paper_cmb->setItemData(i, QVariant(paper_ids[i]));
+        
 
 	connect(unity_cmb, SIGNAL(currentIndexChanged(int)), this, SLOT(convertMarginUnity()));
 	connect(autosave_interv_chk, SIGNAL(toggled(bool)), autosave_interv_spb, SLOT(setEnabled(bool)));

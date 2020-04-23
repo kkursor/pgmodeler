@@ -607,6 +607,7 @@ namespace Attributes {
 	UqConstr("uq-constr"),
 	UqPattern("uq-pattern"),
 	UsagePriv("usage"),
+    UseCopyFrom("use-copy-from"),
 	UseCurvedLines("use-curved-lines"),
 	UsePlaceholders("use-placeholders"),
 	UseSignature("use-signature"),
