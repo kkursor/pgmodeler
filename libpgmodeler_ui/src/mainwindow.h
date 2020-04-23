@@ -1,7 +1,7 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2019 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# Copyright 2006-2020 - Raphael Araújo e Silva <raphael@pgmodeler.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -56,12 +56,12 @@ class MainWindow: public QMainWindow, public Ui::MainWindow {
 	private:
 		Q_OBJECT
 
-		static constexpr int GeneralActionsCount=8;
+		static int GeneralActionsCount;
 
 		static constexpr int WelcomeView=0,
 		DesignView=1,
-        ManageView=2,
-        InfinityInterval = INT_MAX;
+		ManageView=2,
+		InfinityInterval = INT_MAX;
 
 		static bool confirm_validation;
 
@@ -74,26 +74,27 @@ class MainWindow: public QMainWindow, public Ui::MainWindow {
 
 		unsigned pending_op;
 
+		//! \brief Timer used for auto saving the model and temporary model.
+		QTimer model_save_timer,	tmpmodel_save_timer;
+
 		AboutWidget *about_wgt;
 
 		DonateWidget *donate_wgt;
 
 		SceneInfoWidget *scene_info_wgt;
 
+		//! \brief Layers management widget
 		LayersWidget *layers_wgt;
 
 		/*! \brief Widget positioned on the center of main window that contains some basic operations like
 		create new model, open a file, restore session */
 		WelcomeWidget *central_wgt;
 
-		//! \brief Widget used to navigate through the opened models.
-		ModelNavigationWidget *model_nav_wgt;
-
-		//! \brief Timer used for auto saving the model and temporary model.
-		QTimer model_save_timer,	tmpmodel_save_timer;
-
 		//! \brief Model overview widget
 		ModelOverviewWidget *overview_wgt;
+
+		//! \brief Widget used to navigate through the opened models.
+		ModelNavigationWidget *model_nav_wgt;
 
 		//! \brief Model validation widget
 		ModelValidationWidget *model_valid_wgt;
@@ -101,14 +102,14 @@ class MainWindow: public QMainWindow, public Ui::MainWindow {
 		//! \brief SQL tool widget widget
 		SQLToolWidget *sql_tool_wgt;
 
-		//! \brief Temporary model restoration form
-		ModelRestorationForm *restoration_form;
-
 		//! \brief Operation list dock widget
 		OperationListWidget *oper_list_wgt;
 
 		//! \brief Model objects dock widget
 		ModelObjectsWidget *model_objs_wgt;
+
+		//! \brief Temporary model restoration form
+		ModelRestorationForm *restoration_form;
 
 		//! \brief Object finder used as dock widget
 		ObjectFinderWidget *obj_finder_wgt;
@@ -143,7 +144,9 @@ class MainWindow: public QMainWindow, public Ui::MainWindow {
 
 		arrange_menu,
 
-		more_actions_menu;
+		more_actions_menu,
+
+		fix_menu;
 
 		//! \brief QMainWindow::closeEvent() overload: Saves the configurations before close the application
 		void closeEvent(QCloseEvent *event);
@@ -153,21 +156,26 @@ class MainWindow: public QMainWindow, public Ui::MainWindow {
 		//! \brief Set the postion of a floating widget based upon an action at a tool bar
 		void setFloatingWidgetPos(QWidget *widget, QAction *act, QToolBar *toolbar, bool map_to_window);
 
-		void configureSamplesMenu(void);
+		void configureSamplesMenu();
 
 		/*! \brief Stores the current checkboxes states of the main dock widgets on the set of configuration params
 				in order to save them on the main configuration file */
-		void storeDockWidgetsSettings(void);
+		void storeDockWidgetsSettings();
 
 		//! \brief Restore the dock widget configurations from the parameters loaded from main configuration file
-		void restoreDockWidgetsSettings(void);
+		void restoreDockWidgetsSettings();
 
 		//! \brief Shows a error dialog informing that the model demands a fix after the error ocurred when loading the filename.
 		void showFixMessage(Exception &e, const QString &filename);
 
+		/*! \brief This method determines if the provided layout has togglable buttons and one of them are checked.
+		 * This is an auxiliary method used to determine if widget bars (bottom or right) can be displayed based upon
+		 * the current button toggle state. */
+		bool isToolButtonsChecked(QHBoxLayout *layout, const QWidgetList &ignored_wgts = QWidgetList());
+
 	public:
-		MainWindow(QWidget *parent = nullptr, Qt::WindowFlags flags = 0);
-		~MainWindow(void);
+		MainWindow(QWidget *parent = nullptr, Qt::WindowFlags flags = Qt::Widget);
+		virtual ~MainWindow();
 
 		//! \brief Loads a set of models from string list
 		void loadModels(const QStringList &list);
@@ -188,29 +196,40 @@ class MainWindow: public QMainWindow, public Ui::MainWindow {
 		void closeModel(int model_id=-1);
 
 		//! \brief Returns the currently loaded model count.
-		int getModelCount(void);
+		int getModelCount();
 
 		//! \brief Returns the model at given index
 		ModelWidget *getModel(int idx);
 
+		//! \brief Switches the currently opened view (Design, Manage, Welcome)
+		void switchView(int view);
+
+		/*! \brief This is a convenience method to make able the addition of execution tabs in SQL tool without
+		 *  expose the SQL Tool widget itself (useful for plugin developers) */
+		void addExecTabInSQLTool(const QString &sql_cmd);
+
+		/*! \brief This is a convenience method that returns a true value when there're databases listed in the SQL tool widget without
+		 *  expose the SQL Tool widget itself (useful for plugin developers) */
+		bool hasDbsListedInSQLTool();
+
 	private slots:
-		void showMainMenu(void);
+		void showMainMenu();
 
 		//! \brief Atualiza as definições da grade com base nas ações: Exibir Grade, Alin. Grade e Exibir limites
-		void setGridOptions(void);
+		void setGridOptions();
 
 		//! \brief Updates the state (enable/disable) of the buttons of toolbars
 		void updateToolsState(bool model_closed=false);
-		void __updateToolsState(void);
+		void __updateToolsState();
 
 		//! \brief Updates the operation list and model objects dockwidgets
-		void updateDockWidgets(void);
+		void updateDockWidgets();
 
 		//! \brief Updates the reference to the current model when changing the tab focus
-		void setCurrentModel(void);
+		void setCurrentModel();
 
 		//! \brief Loads a model from a file via file dialog
-		void loadModel(void);
+		void loadModel();
 
 		//! \brief Loads a model from a specified filename
 		void loadModel(const QString &filename);
@@ -219,52 +238,52 @@ class MainWindow: public QMainWindow, public Ui::MainWindow {
 		void saveModel(ModelWidget *model=nullptr);
 
 		//! \brief Save all loaded models
-		void saveAllModels(void);
+		void saveAllModels();
 
 		//! \brief Prints the currently focused model
-		void printModel(void);
+		void printModel();
 
 		//! \brief Executes the export of the currently focused model
-		void exportModel(void);
+		void exportModel();
 
 		//! \brief Executes the reverse engineering
-		void importDatabase(void);
+		void importDatabase();
 
 		//! \brief Executes the model <> database comparison
-		void diffModelDatabase(void);
+		void diffModelDatabase();
 
 		//! \brief Updates the opened models with new configurations
-		void applyConfigurations(void);
+		void applyConfigurations();
 
 		//! \brief Applies the zoom to the currently focused model
-		void applyZoom(void);
+		void applyZoom();
 
 		//! \brief Execute the plugin represented by the action that calls the slot
-		void executePlugin(void);
+		void executePlugin();
 
 		//! \brief Toggles the overview widget for the currently opened model
 		void showOverview(bool show);
 
 		//! \brief Updates the tab name of the currently opened model if the database name is changed
-		void updateModelTabName(void);
+		void updateModelTabName();
 
 		//! \brief Loads a recent model. The filename is get from the action that triggered the slot
-		void loadModelFromAction(void);
+		void loadModelFromAction();
 
 		//! \brief Clears the recent models menu/list
-		void clearRecentModelsMenu(void);
+		void clearRecentModelsMenu();
 
 		//! \brief Update the recent models menu entries
-		void updateRecentModelsMenu(void);
+		void updateRecentModelsMenu();
 
 		//! \brief Updates the connections list of the validator widget
 		void updateConnections(bool force = false);
 
 		//! \brief Save the temp files for all opened models
-		void saveTemporaryModels(void);
+		void saveTemporaryModels();
 
 		//! \brief Opens the pgModeler Wiki in a web browser window
-		void openSupport(void);
+		void openSupport();
 
 		/*! \brief Stop the saving timers. This is used when validating the model
 		in order to avoid the saving while the validation is working */
@@ -273,23 +292,29 @@ class MainWindow: public QMainWindow, public Ui::MainWindow {
 		//! \brief Executes one of the pending operations (save, export, diff) after validate the model
 		void executePendingOperation(bool valid_error);
 
+		//! \brief Configures the "More" actions in the general toolbar by usinge the current_model's popup menu
+		void configureMoreActionsMenu();
+
 		void fixModel(const QString &filename=QString());
-		void showRightWidgetsBar(void);
-		void showBottomWidgetsBar(void);
-		void restoreLastSession(void);
+		void showRightWidgetsBar();
+		void showBottomWidgetsBar();
+		void restoreLastSession();
 		void toggleUpdateNotifier(bool show);
 		void toggleAboutWidget(bool show);
 		void toggleDonateWidget(bool show);
-		void removeModelActions(void);
-		void showDemoVersionWarning(void);
+		void removeModelActions();
+		void showDemoVersionWarning();
 		void changeCurrentView(bool checked);
-		void reportBug(void);
-		void removeOperations(void);
-		void handleObjectsMetadata(void);
-		void restoreTemporaryModels(void);
-		void arrangeObjects(void);
-		void toggleCompactView(void);
+		void reportBug();
+		void removeOperations();
+		void handleObjectsMetadata();
+		void restoreTemporaryModels();
+		void arrangeObjects();
+		void toggleCompactView();
 		void toggleLayersWidget(bool show);
+
+	signals:
+		void s_currentModelChanged(ModelWidget *model_wgt);
 };
 
 #endif

@@ -1,7 +1,7 @@
 /*
 # PostgreSQL Database Modeler (pgModeler)
 #
-# Copyright 2006-2019 - Raphael Araújo e Silva <raphael@pgmodeler.io>
+# Copyright 2006-2020 - Raphael Araújo e Silva <raphael@pgmodeler.io>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -124,7 +124,7 @@ QString Exception::messages[Exception::ErrorCount][2]={
 	{"RefObjectInexistsModel", QT_TR_NOOP("The object `%1' (%2) is referencing the object `%3' (%4) which was not found in the model!")},
 	{"RefUserTypeInexistsModel", QT_TR_NOOP("Reference to an user-defined data type that not exists in the model!")},
 	{"AsgInvalidMaxSizeOpList", QT_TR_NOOP("Assignment of invalid maximum size to operation list!")},
-	{"FileDirectoryNotWritten", QT_TR_NOOP("Unable to write the file or directory `%1'! Make sure the output directory exists, or if the user has write permissions over it!")},
+	{"FileDirectoryNotWritten", QT_TR_NOOP("Unable to write the file or directory `%1'! Make sure that the path exists and the user has write permissions over it!")},
 	{"FileNotWrittenInvalidDefinition", QT_TR_NOOP("Unable to write the file `%1' due to one or more errors in the definition generation process!")},
 	{"InsDuplicatedRelationship", QT_TR_NOOP("There is already a relationship between `%1' (%2) and `%3' (%4) in the model! When using relationships of the type generalization, copy and one-to-one there can't be other relationships linked to the pair of tables.")},
 	{"InsRelationshipRedundancy", QT_TR_NOOP("The configuration of the relationship `%1' generates a redundancy between the relationships `%2'. Redundancy on identifier or generalization/copy relationships are not accepted since they result in incorrect column spreading making the model inconsistent!")},
@@ -206,7 +206,7 @@ QString Exception::messages[Exception::ErrorCount][2]={
 	{"RefInvalidLikeOptionType", QT_TR_NOOP("Reference to an invalid copy table option!")},
 	{"InvCopyRelTableDefined", QT_TR_NOOP("The copy relationship between the tables `%1' and `%2' cannot be done because the first one already copies attributes from `%3'! Tables can have only one copy table!")},
 	{"InvPartRelPartitionedDefined", QT_TR_NOOP("The paritioning relationship between the tables `%1' and `%2' cannot be done because the first one is already a partition of the table `%3'! Partition tables can be participating of only one partition hierarchy at a time!")},
-	{"InvRelTypeForPatitionTables", QT_TR_NOOP("The relationship between the tables `%1' and `%2' can't be created because the first entity is part of a partitioning hierachy! The table `%3' can't be used in `generalization', `copy' and `one-to-one' relationships. In `one-to-many' and `many-to-many' relationships the mentioned table can't be referenced by the generated foreign key(s).")},
+	{"InvRelTypeForPatitionTables", QT_TR_NOOP("The relationship between the tables `%1' and `%2' can't be created because one of the entities is part of a partitioning hierachy! The table `%3' can't be used in `generalization', `copy' and `one-to-one' relationships. In `one-to-many' and `many-to-many' relationships the mentioned table can't be referenced by the generated foreign key(s).")},
 	{"InvTableTriggerInsteadOfFiring", QT_TR_NOOP("The INSTEAD OF mode cannot be used on triggers that belongs to tables! This is available only for view triggers!")},
 	{"InvUsageTruncateOnTrigger", QT_TR_NOOP("The TRUNCATE event can only be used when the trigger executes for each statement and belongs to a table!")},
 	{"InvUsageInsteadOfOnTrigger", QT_TR_NOOP("The INSTEAD OF mode cannot be used on view triggers that executes for each statement!")},
@@ -267,10 +267,11 @@ QString Exception::messages[Exception::ErrorCount][2]={
 	{"ModelFileInvalidSize", QT_TR_NOOP("A zero-byte file was detected while saving to `%1'. In order to avoid data loss the original contents of the file prior to the last saving was restored and a security copy kept on `%2'. You can copy that backup file to a safe place as a last resort to avoid the complete data loss! Note that the backup file will be erased when the application is closed.")},
 	{"AsgInvalidObjectForeignTable", QT_TR_NOOP("The object `%1' (%2) can't be assigned to the foreign table `%3' because it's unsupported! Foreign tables only accepts columns, check constraints and triggers.")},
 	{"InvRelTypeForeignTable", QT_TR_NOOP("The creation of the relationship `%1' between the tables `%2' and `%3' can't be done because one of the entities is a foreign table. Foreign tables can only be part of a inheritance, copy or partitioning relationship!")},
-	{"InvCopyRelForeignTable", QT_TR_NOOP("The creation of the copy relationship `%1' between the tables `%2' and `%3' can't be done because a foreign table is not allowed to copy table columns!")}
+	{"InvCopyRelForeignTable", QT_TR_NOOP("The creation of the copy relationship `%1' between the tables `%2' and `%3' can't be done because a foreign table is not allowed to copy table columns!")},
+	{"InvDataDictDirectory", QT_TR_NOOP("Failed to save the data dictionary into `%1'! Make sure that the provided path points to a directory or if the user has write permissions over it!")}
 };
 
-Exception::Exception(void)
+Exception::Exception()
 {
 	configureException(QString(),ErrorCode::Custom,QString(),QString(),-1,QString());
 }
@@ -355,9 +356,9 @@ void Exception::configureException(const QString &msg, ErrorCode error_code, con
 	this->extra_info=QString(extra_info);
 }
 
-QString Exception::getErrorMessage(void)
+QString Exception::getErrorMessage()
 {
-	return(error_msg);
+	return error_msg;
 }
 
 QString Exception::getErrorMessage(ErrorCode error_code)
@@ -366,42 +367,42 @@ QString Exception::getErrorMessage(ErrorCode error_code)
 		/* Because the Exception class is not derived from QObject the function tr() is inefficient to translate messages
 		 so the translation method is called  directly from the application specifying the
 		 context (Exception) in the ts file and the text to be translated */
-		return(QApplication::translate("Exception", messages[enum_cast(error_code)][ErrorMessage].toStdString().c_str(), "", -1));
+		return QApplication::translate("Exception", messages[enum_cast(error_code)][ErrorMessage].toStdString().c_str(), "", -1);
 	else
-		return(QString());
+		return QString();
 }
 
 QString Exception::getErrorCode(ErrorCode error_code)
 {
 	if(enum_cast(error_code) < ErrorCount)
-		return(messages[enum_cast(error_code)][ErrorCodeId]);
+		return messages[enum_cast(error_code)][ErrorCodeId];
 	else
-		return(QString());
+		return QString();
 }
 
-QString Exception::getMethod(void)
+QString Exception::getMethod()
 {
-	return(method);
+	return method;
 }
 
-QString Exception::getFile(void)
+QString Exception::getFile()
 {
-	return(file);
+	return file;
 }
 
-QString Exception::getLine(void)
+QString Exception::getLine()
 {
-	return(QString("%1").arg(line));
+	return QString("%1").arg(line);
 }
 
-ErrorCode Exception::getErrorCode(void)
+ErrorCode Exception::getErrorCode()
 {
-	return(error_code);
+	return error_code;
 }
 
-QString Exception::getExtraInfo(void)
+QString Exception::getExtraInfo()
 {
-	return(extra_info);
+	return extra_info;
 }
 
 void Exception::addException(Exception &exception)
@@ -429,7 +430,7 @@ void Exception::getExceptionsList(vector<Exception> &list)
 							 this->method,this->file,this->line,nullptr,this->extra_info));
 }
 
-QString Exception::getExceptionsText(void)
+QString Exception::getExceptionsText()
 {
 	vector<Exception> exceptions;
 	vector<Exception>::reverse_iterator itr, itr_end;
@@ -470,6 +471,6 @@ QString Exception::getExceptionsText(void)
 		}
 	}
 
-	return(exceptions_txt);
+	return exceptions_txt;
 }
 
